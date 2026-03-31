@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>张猛团队 · 利润管理看板 v5</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0e0f;--bg2:#161618;--bg3:#1e1e21;--bg4:#252528;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --text:#e8e6e1;--text2:#888680;--text3:#4f4d4a;
+  --accent:#c8b87a;--accent2:#8b6f3a;
+  --green:#5a9e78;--green-bg:rgba(90,158,120,0.13);
+  --red:#c0524a;--red-bg:rgba(192,82,74,0.13);
+  --amber:#c89a4a;--amber-bg:rgba(200,154,74,0.13);
+  --blue:#4a82b8;--blue-bg:rgba(74,130,184,0.13);
+  --purple:#8b72c8;--purple-bg:rgba(139,114,200,0.13);
+  --mono:'DM Mono',monospace;--sans:'Noto Sans SC',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;line-height:1.6;min-height:100vh;}
+nav{display:flex;align-items:center;border-bottom:1px solid var(--border);padding:0 24px;background:var(--bg);position:sticky;top:0;z-index:200;overflow-x:auto;}
+.nav-brand{font-family:var(--mono);font-size:12px;color:var(--accent);padding:15px 0;margin-right:20px;letter-spacing:.05em;white-space:nowrap;}
+.nav-tab{font-size:12px;color:var(--text2);padding:15px 12px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-tab:hover{color:var(--text);}
+.nav-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.nav-right{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text3);padding:15px 0;white-space:nowrap;padding-left:16px;}
+.page{display:none;padding:24px;max-width:1160px;margin:0 auto;}
+.page.active{display:block;}
+.sec-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin-bottom:12px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.four-col{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:13px 16px;}
+.metric-label{font-size:10px;color:var(--text3);margin-bottom:4px;letter-spacing:.03em;}
+.metric-value{font-family:var(--mono);font-size:19px;color:var(--text);}
+.metric-value.green{color:var(--green);}
+.metric-value.red{color:var(--red);}
+.metric-value.amber{color:var(--amber);}
+.metric-value.blue{color:var(--blue);}
+.metric-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px;}
+.panel-title{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:12px;letter-spacing:.04em;}
+.cost-row{display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);}
+.cost-row:last-child{border-bottom:none;}
+.cost-name{flex:1;min-width:0;}
+.cost-name input{width:100%;background:transparent;border:none;color:var(--text);font-size:13px;font-family:var(--sans);outline:none;}
+.cost-name input:focus{border-bottom:1px solid var(--border2);}
+.cost-name input::placeholder{color:var(--text3);}
+.num-input{width:74px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:13px;padding:3px 7px;text-align:right;outline:none;}
+.num-input:focus{border-color:var(--border2);}
+.cost-unit{font-size:10px;color:var(--text3);min-width:12px;}
+.del-btn{width:19px;height:19px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.del-btn:hover{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+.add-btn{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;margin-top:8px;padding:6px;background:transparent;border:1px dashed var(--border);border-radius:6px;color:var(--text3);font-size:12px;cursor:pointer;transition:all .15s;}
+.add-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border2);}
+.top-box{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:11px 13px;}
+.top-box-label{font-size:10px;color:var(--text3);margin-bottom:4px;}
+.top-box input{width:100%;background:transparent;border:none;color:var(--text);font-family:var(--mono);font-size:17px;outline:none;}
+.result-block{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:13px 16px;}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:12px;border-bottom:1px solid var(--border);}
+.result-row:last-child{border-bottom:none;}
+.result-key{color:var(--text2);}
+.result-val{font-family:var(--mono);color:var(--text);}
+.result-sub{padding-left:12px;font-size:11px;}
+.result-sub .result-key{color:var(--text3);}
+.result-sub .result-val{color:var(--text3);}
+.net-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border2);}
+.net-label{font-size:13px;color:var(--text);}
+.net-val{font-family:var(--mono);font-size:21px;}
+.net-val.green{color:var(--green);}
+.net-val.red{color:var(--red);}
+.badge{font-size:10px;padding:2px 7px;border-radius:99px;letter-spacing:.02em;}
+.badge-red{background:var(--red-bg);color:var(--red);}
+.badge-green{background:var(--green-bg);color:var(--green);}
+.badge-amber{background:var(--amber-bg);color:var(--amber);}
+.badge-blue{background:var(--blue-bg);color:var(--blue);}
+.badge-purple{background:var(--purple-bg);color:var(--purple);}
+.badge-gray{background:rgba(255,255,255,.06);color:var(--text2);}
+.prog-wrap{height:3px;background:var(--bg3);border-radius:2px;margin-top:5px;overflow:hidden;}
+.prog-bar{height:3px;border-radius:2px;background:var(--accent2);transition:width .3s;}
+.prog-bar.green{background:var(--green);}
+.prog-bar.red{background:var(--red);}
+.prog-bar.amber{background:var(--amber);}
+.prog-bar.blue{background:var(--blue);}
+/* ANALYSIS BOX */
+.analysis-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-bottom:16px;}
+.analysis-title{font-size:10px;color:var(--accent);letter-spacing:.1em;font-family:var(--mono);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.analysis-item{display:flex;gap:10px;margin-bottom:10px;font-size:13px;line-height:1.7;color:var(--text2);}
+.analysis-item:last-child{margin-bottom:0;}
+.analysis-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:8px;}
+.analysis-dot.red{background:var(--red);}
+.analysis-dot.amber{background:var(--amber);}
+.analysis-dot.green{background:var(--green);}
+.analysis-dot.blue{background:var(--blue);}
+/* SCENARIO TABLE */
+.scenario-row{display:grid;grid-template-columns:1fr 100px 120px 100px 28px;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border);font-size:12px;}
+.scenario-row:last-child{border-bottom:none;}
+.scenario-head{font-size:10px;color:var(--text3);background:var(--bg3);border-radius:6px 6px 0 0;padding:6px 10px;}
+.scenario-name-input{background:transparent;border:none;color:var(--text);font-size:12px;font-family:var(--sans);outline:none;width:100%;}
+.scenario-name-input:focus{border-bottom:1px solid var(--border2);}
+.scenario-num-input{width:90px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;padding:3px 6px;text-align:right;outline:none;}
+.scenario-select{width:115px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;padding:3px 6px;outline:none;cursor:pointer;}
+/* PROJECT LIST */
+.project-list{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
+.project-item{display:flex;align-items:center;gap:7px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;cursor:pointer;transition:all .15s;}
+.project-item:hover{border-color:var(--border2);}
+.project-item.active{border-color:var(--accent2);background:var(--bg3);}
+.project-dot{width:6px;height:6px;border-radius:50%;background:var(--accent2);flex-shrink:0;}
+.project-name-wrap{flex:1;}
+.project-name{font-size:13px;color:var(--text);}
+.project-sub{font-size:10px;color:var(--text3);margin-top:1px;font-family:var(--mono);}
+.project-profit{font-family:var(--mono);font-size:12px;}
+.add-project-btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;background:transparent;border:1px dashed var(--border);border-radius:8px;color:var(--text3);font-size:12px;cursor:pointer;transition:all .15s;}
+.add-project-btn:hover{background:var(--bg3);color:var(--text2);border-color:var(--border2);}
+.del-project-btn{padding:2px 8px;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text3);font-size:10px;cursor:pointer;transition:all .15s;}
+.del-project-btn:hover{background:var(--red-bg);color:var(--red);border-color:var(--red);}
+.move-btn{width:17px;height:17px;border-radius:3px;border:1px solid var(--border);background:transparent;color:var(--text3);font-size:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.move-btn:hover{background:var(--bg4);color:var(--text2);}
+.project-header{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.project-header input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:16px;font-family:var(--sans);outline:none;padding-bottom:3px;flex:1;}
+.status-select{background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;padding:3px 7px;outline:none;cursor:pointer;}
+.cost-category{margin-bottom:12px;}
+.cost-category-title{font-size:10px;color:var(--accent2);letter-spacing:.08em;margin-bottom:6px;text-transform:uppercase;font-family:var(--mono);}
+.check-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border-radius:6px;margin-bottom:8px;font-size:12px;color:var(--text2);}
+.check-row input[type=checkbox]{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;}
+.check-row label{cursor:pointer;flex:1;}
+.ai-box{background:var(--bg3);border:1px solid rgba(200,184,122,0.18);border-radius:8px;padding:13px 16px;margin-top:12px;}
+.ai-box-title{font-size:10px;color:var(--accent);letter-spacing:.08em;font-family:var(--mono);margin-bottom:9px;}
+.ai-insight{display:flex;gap:8px;margin-bottom:7px;font-size:12px;line-height:1.7;color:var(--text2);}
+.ai-insight:last-child{margin-bottom:0;}
+.ai-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px;}
+.ai-dot.red{background:var(--red);}
+.ai-dot.amber{background:var(--amber);}
+.ai-dot.green{background:var(--green);}
+.team-row{display:grid;grid-template-columns:90px 1fr 70px 22px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);}
+.team-row:last-child{border-bottom:none;}
+.team-role-input{background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--accent);font-size:11px;padding:3px 7px;outline:none;font-family:var(--mono);width:100%;}
+.team-name-input{background:transparent;border:none;color:var(--text);font-size:13px;font-family:var(--sans);outline:none;width:100%;}
+.team-name-input:focus{border-bottom:1px solid var(--border2);}
+.team-time-input{background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;padding:3px 6px;text-align:right;outline:none;font-family:var(--mono);width:100%;}
+/* CASH */
+.cash-row{display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--border);}
+.cash-row:last-child{border-bottom:none;}
+.cash-label-input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:13px;font-family:var(--sans);outline:none;}
+.cash-date-input{width:108px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;padding:3px 6px;outline:none;font-family:var(--mono);}
+.cash-amt-input{width:72px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:13px;padding:3px 7px;text-align:right;outline:none;}
+.cash-tag{font-size:10px;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.tag-supplier{background:var(--amber-bg);color:var(--amber);}
+.tag-urgent{background:var(--red-bg);color:var(--red);}
+.tag-free{background:var(--blue-bg);color:var(--blue);}
+.cash-pool-val{font-family:var(--mono);font-size:24px;font-weight:500;margin-top:4px;}
+.cash-pool-val.green{color:var(--green);}
+.cash-pool-val.amber{color:var(--amber);}
+.cash-pool-val.red{color:var(--red);}
+/* MONTHLY */
+.month-row{display:grid;grid-template-columns:110px 1fr 1fr 80px 80px 28px;gap:8px;align-items:center;padding:7px 10px;border-bottom:1px solid var(--border);font-size:12px;}
+.month-row:last-child{border-bottom:none;}
+.month-selector{display:flex;gap:4px;align-items:center;}
+.month-year-input{width:54px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:12px;padding:3px 5px;text-align:center;outline:none;}
+.month-month-select{width:42px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text2);font-size:11px;padding:3px 3px;outline:none;cursor:pointer;}
+.month-num-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:12px;padding:3px 6px;text-align:right;outline:none;}
+.month-num-input.income{color:var(--green);}
+.month-num-input.expense{color:var(--red);}
+/* SUB TABS */
+.sub-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border);}
+.sub-tab{font-size:12px;color:var(--text2);padding:8px 14px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;}
+.sub-tab:hover{color:var(--text);}
+.sub-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.sub-page{display:none;}
+.sub-page.active{display:block;}
+@media(max-width:800px){
+  nav{padding:0 12px;}
+  .page{padding:14px;}
+  .four-col,.three-col{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .scenario-row{grid-template-columns:1fr 80px 100px 80px 24px;}
+  .month-row{grid-template-columns:90px 1fr 1fr 60px 60px 24px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">ZM / 看板 v5</div>
+  <div class="nav-tab active" onclick="showPage('overview',this)">总览</div>
+  <div class="nav-tab" onclick="showPage('simulator',this)">成本模拟</div>
+  <div class="nav-tab" onclick="showPage('creative',this)">创意月费</div>
+  <div class="nav-tab" onclick="showPage('projects',this)">项目分摊</div>
+  <div class="nav-tab" onclick="showPage('cashboard',this)">资金看板</div>
+  <div class="nav-right" id="nav-date"></div>
+</nav>
+
+<!-- ======== OVERVIEW ======== -->
+<div class="page active" id="page-overview">
+  <div class="sec-lbl" style="margin-bottom:16px;">总览 · 实时同步成本模拟器</div>
+  <div class="four-col" id="ov-metrics"></div>
+  <div class="two-col">
+    <div class="panel"><div class="panel-title">成本结构分布</div><div id="ov-breakdown"></div></div>
+    <div class="panel"><div class="panel-title">关键指标达标</div><div id="ov-compare"></div></div>
+  </div>
+  <div class="analysis-box">
+    <div class="analysis-title">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;"></span>
+      实事分析 · 基于当前数字的关注点与策略建议
+    </div>
+    <div id="ov-analysis"></div>
+  </div>
+</div>
+
+<!-- ======== SIMULATOR ======== -->
+<div class="page" id="page-simulator">
+  <div class="sec-lbl" style="margin-bottom:16px;">成本模拟器 · 修改后自动同步总览</div>
+  <div class="two-col">
+    <div>
+      <div class="sec-lbl">收入参数</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div class="top-box"><div class="top-box-label">营业额（万元）</div><input type="number" id="sim-rev" value="5177" step="10" oninput="calcSim()"></div>
+        <div class="top-box"><div class="top-box-label">毛利率（%）</div><input type="number" id="sim-margin" value="20.86" step="0.1" oninput="calcSim()"></div>
+      </div>
+      <div class="sec-lbl">成本项目</div>
+      <div class="panel" style="padding:13px 16px;">
+        <div id="sim-cost-list"></div>
+        <button class="add-btn" onclick="simAddRow()">+ 添加成本项目</button>
+      </div>
+    </div>
+    <div>
+      <div class="sec-lbl">计算结果</div>
+      <div class="result-block">
+        <div class="result-row"><span class="result-key">营业额</span><span class="result-val" id="sr-rev">—</span></div>
+        <div class="result-row"><span class="result-key">毛利额</span><span class="result-val" id="sr-gross">—</span></div>
+        <div class="result-row"><span class="result-key">总成本</span><span class="result-val" id="sr-total">—</span></div>
+        <div id="sr-items"></div>
+        <div class="net-row"><span class="net-label">预估净利润</span><span class="net-val" id="sr-net">—</span></div>
+      </div>
+      <div class="panel" style="margin-top:16px;">
+        <div class="panel-title">场景对比 · 可自定义编辑</div>
+        <div style="display:grid;grid-template-columns:1fr 100px 120px 100px 28px;gap:8px;align-items:center;padding:5px 10px;background:var(--bg3);border-radius:6px 6px 0 0;font-size:10px;color:var(--text3);">
+          <div>场景名称</div><div style="text-align:right;">创意成本（万）</div><div>竞标费归属</div><div style="text-align:right;">净利润</div><div></div>
+        </div>
+        <div id="scenario-list" style="background:var(--bg2);border:1px solid var(--border);border-radius:0 0 6px 6px;border-top:none;"></div>
+        <button class="add-btn" style="margin-top:6px;" onclick="addScenario()">+ 添加场景</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== CREATIVE FEE ======== -->
+<div class="page" id="page-creative">
+  <div class="sec-lbl" style="margin-bottom:16px;">创意月费规划 · 人力配置与年度预算</div>
+  <div class="two-col">
+    <div>
+      <div class="panel">
+        <div class="panel-title">月费总预算设置</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div class="top-box">
+            <div class="top-box-label">月度预算上限（万元）</div>
+            <input type="number" id="cf-monthly-cap" value="24" step="1" oninput="calcCreativeFee()">
+          </div>
+          <div class="top-box">
+            <div class="top-box-label">年度总费用（万元）<span style="color:var(--text3);font-size:9px;margin-left:4px;">可手动覆盖</span></div>
+            <input type="number" id="cf-annual-override" placeholder="自动计算" step="1" oninput="calcCreativeFee()">
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--text3);margin-bottom:10px;letter-spacing:.06em;text-transform:uppercase;font-family:var(--mono);">人力角色配置</div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px 26px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);">
+          <div>角色 / 描述</div><div style="text-align:right;">月费（万）</div><div style="text-align:right;">人数</div><div></div>
+        </div>
+        <div id="cf-role-list"></div>
+        <button class="add-btn" onclick="cfAddRole()">+ 添加角色</button>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <div class="panel-title">费用汇总</div>
+        <div id="cf-summary"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">月费利用率分析</div>
+        <div id="cf-analysis" style="font-size:12px;color:var(--text2);line-height:1.9;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== PROJECTS ======== -->
+<div class="page" id="page-projects">
+  <div class="sec-lbl" style="margin-bottom:16px;">项目分摊 · 成本拆解 + 人力规划</div>
+  <div class="two-col">
+    <div>
+      <div class="sec-lbl">项目列表</div>
+      <div class="project-list" id="project-list"></div>
+      <button class="add-project-btn" onclick="addProject()">+ 新增项目</button>
+    </div>
+    <div id="project-detail-wrap">
+      <div style="color:var(--text3);font-size:13px;padding-top:48px;text-align:center;">← 选择左侧项目</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== CASH ======== -->
+<div class="page" id="page-cashboard">
+  <div class="sec-lbl" style="margin-bottom:16px;">资金看板 · 可用资金池 + 月度流动</div>
+  <div class="four-col" style="margin-bottom:20px;">
+    <div class="metric-card">
+      <div class="metric-label">资金池总额（万元）</div>
+      <input type="number" id="cash-total" value="500" step="10" oninput="calcCash()"
+        style="background:transparent;border:none;border-bottom:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:20px;outline:none;width:100%;margin-top:5px;">
+    </div>
+    <div class="metric-card"><div class="metric-label">已承诺支出</div><div class="metric-value amber" id="cash-committed">—</div><div class="metric-sub" id="cash-committed-pct">占比 —</div></div>
+    <div class="metric-card"><div class="metric-label">真实可用余额</div><div class="cash-pool-val" id="cash-free-val">—</div><div class="prog-wrap" style="margin-top:8px;"><div id="cash-free-bar" class="prog-bar green" style="width:0%"></div></div></div>
+    <div class="metric-card"><div class="metric-label">月度累计净额</div><div class="metric-value" id="cash-month-net">—</div><div class="metric-sub" id="cash-month-sub">— 个月</div></div>
+  </div>
+  <div class="sub-tabs">
+    <div class="sub-tab active" onclick="showSubTab('cash-payments',this)">付款管理</div>
+    <div class="sub-tab" onclick="showSubTab('cash-monthly',this)">月度流动</div>
+  </div>
+  <div class="sub-page active" id="sub-cash-payments">
+    <div class="two-col">
+      <div>
+        <div class="panel"><div class="panel-title">供应商付款</div><div id="cash-supplier-list"></div><button class="add-btn" onclick="cashAddRow('supplier')">+ 添加</button></div>
+        <div class="panel"><div class="panel-title">紧急付款</div><div id="cash-urgent-list"></div><button class="add-btn" onclick="cashAddRow('urgent')">+ 添加</button></div>
+      </div>
+      <div>
+        <div class="panel"><div class="panel-title">Free 人员付款</div><div id="cash-free-list"></div><button class="add-btn" onclick="cashAddRow('freelance')">+ 添加</button></div>
+        <div class="panel"><div class="panel-title">资金占比分布</div><div id="cash-breakdown"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="sub-page" id="sub-cash-monthly">
+    <div class="panel">
+      <div class="panel-title">月度收支流动 · 年份和月份可独立修改</div>
+      <div style="display:grid;grid-template-columns:110px 1fr 1fr 80px 80px 28px;gap:8px;align-items:center;padding:5px 10px;background:var(--bg3);border-radius:6px 6px 0 0;font-size:10px;color:var(--text3);">
+        <div>年 / 月</div><div style="text-align:right;">收入（万）</div><div style="text-align:right;">支出（万）</div><div style="text-align:right;">净额</div><div style="text-align:right;">收入占比</div><div></div>
+      </div>
+      <div id="monthly-list" style="background:var(--bg2);border:1px solid var(--border);border-radius:0 0 6px 6px;border-top:none;"></div>
+      <button class="add-btn" style="margin-top:6px;" onclick="addMonth()">+ 添加月份</button>
+    </div>
+    <div class="two-col">
+      <div class="panel"><div class="panel-title">月度汇总</div><div id="monthly-summary"></div></div>
+      <div class="panel"><div class="panel-title">趋势分析</div><div id="monthly-trend" style="font-size:12px;color:var(--text2);line-height:1.9;"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// DATE
+(function(){var d=new Date();document.getElementById('nav-date').textContent=d.getFullYear()+'.'+(''+(d.getMonth()+1)).padStart(2,'0')+'.'+(''+d.getDate()).padStart(2,'0');})();
+
+// NAV
+function showPage(id,el){document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});document.getElementById('page-'+id).classList.add('active');el.classList.add('active');}
+function showSubTab(id,el){document.querySelectorAll('.sub-page').forEach(function(p){p.classList.remove('active');});document.querySelectorAll('.sub-tab').forEach(function(t){t.classList.remove('active');});document.getElementById('sub-'+id).classList.add('active');el.classList.add('active');}
+
+// UTILS
+function fmt(n){var v=Math.round(Math.abs(n)*10)/10;return (n<0?'-':'')+v.toLocaleString('zh-CN')+' 万';}
+function fmtPct(n){return (Math.round(n*10)/10)+'%';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// ===== SIM STATE =====
+var simCosts=[
+  {label:'团队工资（8人）',amount:230},
+  {label:'创意中台分摊（月费制×12）',amount:240,isMonthly:true},
+  {label:'后台人工',amount:67},
+  {label:'房租水电等',amount:163},
+  {label:'公司分子钱',amount:100},
+  {label:'竞标失败费用',amount:156,disputed:true},
+];
+
+// SCENARIO STATE - fully editable
+var scenarios=[
+  {name:'现状机制延续',creative:320,bidOwn:156,bidLabel:'团队全额承担'},
+  {name:'月费制+竞标剥离',creative:240,bidOwn:0,bidLabel:'公司完全承担'},
+  {name:'最优方案',creative:200,bidOwn:0,bidLabel:'公司完全承担'},
+];
+var bidOptions=['团队全额承担','公司完全承担','各承担50%','待定','自定义'];
+var fixedOther=67+163+100+230;
+
+function getSimVals(){
+  var rev=parseFloat(document.getElementById('sim-rev').value)||0;
+  var margin=parseFloat(document.getElementById('sim-margin').value)||0;
+  var gross=rev*margin/100;
+  var totalCost=simCosts.reduce(function(s,c){return s+(parseFloat(c.amount)||0);},0);
+  var net=gross-totalCost;
+  var bidItem=simCosts.find(function(c){return c.disputed;});
+  var bidAmt=bidItem?bidItem.amount:0;
+  return{rev:rev,margin:margin,gross:gross,totalCost:totalCost,net:net,bidAmt:bidAmt};
+}
+
+// OVERVIEW ANALYSIS
+function genAnalysis(v){
+  var items=[];
+  var humanPct=v.rev>0?230/v.rev*100:0;
+  var creativePct=v.gross>0?(240+19)/v.gross*100:0;
+  var perHead=v.gross/8;
+  var netNoBid=v.net+v.bidAmt;
+
+  // Margin
+  if(v.margin<20)items.push({d:'red',t:'毛利率 '+fmtPct(v.margin)+' 低于20%警戒线，建议优先排查低毛利项目是否存在报价偏低或项目超支情况，考虑提高报价门槛或缩减低效项目。'});
+  else if(v.margin<24)items.push({d:'amber',t:'毛利率 '+fmtPct(v.margin)+' 尚未达到公司要求的24%目标，差距 '+fmtPct(24-v.margin)+'。当前主要拖累来自分摊成本，需推进月费制改革以改善毛利结构。'});
+  else items.push({d:'green',t:'毛利率 '+fmtPct(v.margin)+' 达标（目标24%），整体盈利能力健康，建议维持现有业务节奏并关注客单质量。'});
+
+  // Human cost
+  if(humanPct>20)items.push({d:'red',t:'团队薪资占营收比 '+fmtPct(humanPct)+'，超过20%健康线。人力成本偏重，短期内建议控制新增HC，优先提高人均产出而非扩张规模。'});
+  else if(humanPct>15)items.push({d:'amber',t:'薪资占营收比 '+fmtPct(humanPct)+'，在合理区间内但有上升空间。关注人均产出（当前 '+fmt(perHead)+'），若低于107万需调整目标分配。'});
+  else items.push({d:'green',t:'薪资占营收比 '+fmtPct(humanPct)+'，人力成本控制良好。人均毛利贡献 '+fmt(perHead)+'，团队效能健康。'});
+
+  // Creative cost
+  if(creativePct>30)items.push({d:'red',t:'创意中台成本占净毛利 '+fmtPct(creativePct)+'，严重偏高。当前按时间占比分摊的机制使得业务越活跃、创意成本越重，形成负向循环。月费制改革是首要优先级。'});
+  else if(creativePct>20)items.push({d:'amber',t:'创意中台成本占净毛利 '+fmtPct(creativePct)+'，仍有压缩空间。建议推进月费制，将年度创意成本锁定在200-240万区间内。'});
+  else items.push({d:'green',t:'创意成本占比 '+fmtPct(creativePct)+'，在可接受范围内。'});
+
+  // Bid cost
+  if(v.bidAmt>0){
+    var bidPct=v.gross>0?v.bidAmt/v.gross*100:0;
+    items.push({d:'amber',t:'竞标失败费用 '+fmt(v.bidAmt)+'（占净毛利 '+fmtPct(bidPct)+'）目前由团队全额承担，剥离后净利润可提升至 '+fmt(netNoBid)+'。这是近期最具杠杆效应的单项改善点，建议在下次战略会议中正式提案。'});
+  }
+
+  // Net
+  if(v.net<0)items.push({d:'red',t:'当前分摊机制下团队净利润为负（'+fmt(v.net)+'），亏损状态不可持续。需在30天内推动至少一项机制变更：竞标费用剥离或月费制落地。'});
+  else if(v.net<100)items.push({d:'amber',t:'净利润 '+fmt(v.net)+' 偏薄，安全边际不足。一旦有大客户流失或额外费用，很快转负。建议将竞标费用剥离作为近期谈判目标。'});
+  else items.push({d:'green',t:'净利润 '+fmt(v.net)+'，整体经营安全。建议将盈余的一部分用于团队激励和人才梯队建设，增强可持续性。'});
+
+  return items;
+}
+
+function renderOverview(){
+  var v=getSimVals();
+  var netNoBid=v.net+v.bidAmt;
+  document.getElementById('ov-metrics').innerHTML=[
+    {label:'营业额',val:fmt(v.rev),cls:''},
+    {label:'净毛利润（分摊前）',val:fmt(v.gross),cls:'green'},
+    {label:'分摊后净利润',val:fmt(v.net),cls:v.net>=0?'green':'red'},
+    {label:'剥离竞标后净利润',val:fmt(netNoBid),cls:netNoBid>=0?'green':'red'},
+  ].map(function(m){return '<div class="metric-card"><div class="metric-label">'+m.label+'</div><div class="metric-value '+m.cls+'">'+m.val+'</div></div>';}).join('');
+
+  document.getElementById('ov-breakdown').innerHTML=simCosts.map(function(c){
+    var pct=v.gross>0?c.amount/v.gross*100:0;
+    var bcls=c.disputed?'red':(pct>25?'amber':'');
+    return '<div style="margin-bottom:9px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span style="color:var(--text2);">'+c.label+(c.disputed?' <span class="badge badge-red">争议</span>':'')+'</span><span style="font-family:var(--mono);color:var(--text);">'+fmt(c.amount)+'</span></div><div class="prog-wrap"><div class="prog-bar '+bcls+'" style="width:'+Math.min(pct,100)+'%"></div></div><div style="font-size:10px;color:var(--text3);margin-top:2px;">占净毛利 '+fmtPct(pct)+'</div></div>';
+  }).join('');
+
+  var humanPct=v.rev>0?230/v.rev*100:0;
+  var creativePct=v.gross>0?(240+19)/v.gross*100:0;
+  var perHead=v.gross/8;
+  document.getElementById('ov-compare').innerHTML=[
+    {label:'毛利率',val:fmtPct(v.margin),target:'24%',ok:v.margin>=24},
+    {label:'薪资占营收比',val:fmtPct(humanPct),target:'< 20%',ok:humanPct<20},
+    {label:'人均毛利贡献',val:fmt(perHead),target:'107万持平',ok:perHead>=107},
+    {label:'创意成本占毛利',val:fmtPct(creativePct),target:'< 25%',ok:creativePct<25},
+  ].map(function(r){return '<div class="result-row"><span class="result-key">'+r.label+'</span><span style="display:flex;align-items:center;gap:7px;"><span style="font-size:10px;color:var(--text3);">目标 '+r.target+'</span><span class="badge '+(r.ok?'badge-green':'badge-red')+'">'+r.val+'</span></span></div>';}).join('');
+
+  var analysis=genAnalysis(v);
+  document.getElementById('ov-analysis').innerHTML=analysis.map(function(a){
+    return '<div class="analysis-item"><div class="analysis-dot '+a.d+'"></div><div>'+a.t+'</div></div>';
+  }).join('');
+}
+
+// SIMULATOR
+function renderSimList(){
+  var list=document.getElementById('sim-cost-list');list.innerHTML='';
+  simCosts.forEach(function(item,i){
+    var row=document.createElement('div');row.className='cost-row';
+    row.innerHTML='<div class="cost-name"><input type="text" value="'+esc(item.label)+'" placeholder="成本名称" oninput="simCosts['+i+'].label=this.value;calcSim()"></div>'+
+      '<div style="display:flex;align-items:center;gap:4px;"><input class="num-input" type="number" value="'+item.amount+'" step="1" oninput="simCosts['+i+'].amount=parseFloat(this.value)||0;calcSim()"><span class="cost-unit">万</span></div>'+
+      (item.disputed?'<span class="badge badge-amber" style="font-size:9px;">争议</span>':'')+
+      '<button class="del-btn" onclick="simDelRow('+i+')">×</button>';
+    list.appendChild(row);
+  });
+  calcSim();
+}
+function simAddRow(){simCosts.push({label:'新成本项目',amount:0});renderSimList();}
+function simDelRow(i){simCosts.splice(i,1);renderSimList();}
+
+// SCENARIOS
+function addScenario(){scenarios.push({name:'新场景',creative:240,bidOwn:0,bidLabel:'待定'});renderScenarios();}
+
+function calcScenarioNet(s,gross){
+  return gross-s.creative-s.bidOwn-fixedOther;
+}
+
+function renderScenarios(){
+  var v=getSimVals();
+  var list=document.getElementById('scenario-list');list.innerHTML='';
+  scenarios.forEach(function(s,i){
+    var net=calcScenarioNet(s,v.gross);
+    var row=document.createElement('div');row.className='scenario-row';
+    var bidSelectHTML='<select class="scenario-select" onchange="handleBidSelect('+i+',this)">';
+    bidOptions.forEach(function(opt){bidSelectHTML+='<option value="'+opt+'"'+(s.bidLabel===opt?' selected':'')+'>'+opt+'</option>';});
+    bidSelectHTML+='</select>';
+    row.innerHTML='<input class="scenario-name-input" type="text" value="'+esc(s.name)+'" oninput="scenarios['+i+'].name=this.value">'+
+      '<input class="scenario-num-input" type="number" value="'+s.creative+'" step="10" oninput="scenarios['+i+'].creative=parseFloat(this.value)||0;renderScenarios()">'+
+      bidSelectHTML+
+      '<div style="font-family:var(--mono);font-size:12px;color:'+(net>=0?'var(--green)':'var(--red)')+';">'+fmt(net)+'</div>'+
+      '<button class="del-btn" onclick="scenarios.splice('+i+',1);renderScenarios()">×</button>';
+    list.appendChild(row);
+    // Custom bid own input row if custom
+    if(s.bidLabel==='自定义'){
+      var customRow=document.createElement('div');
+      customRow.style.cssText='padding:4px 10px 8px 10px;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;';
+      customRow.innerHTML='<span>└ 团队承担金额</span><input class="scenario-num-input" style="width:80px;" type="number" value="'+s.bidOwn+'" step="1" oninput="scenarios['+i+'].bidOwn=parseFloat(this.value)||0;renderScenarios()"><span>万</span>';
+      list.appendChild(customRow);
+    }
+  });
+}
+
+window.handleBidSelect=function(i,el){
+  var val=el.value;
+  var bidTotal=simCosts.find(function(c){return c.disputed;})||{amount:156};
+  var bidAmt=bidTotal.amount;
+  if(val==='团队全额承担')scenarios[i].bidOwn=bidAmt;
+  else if(val==='公司完全承担')scenarios[i].bidOwn=0;
+  else if(val==='各承担50%')scenarios[i].bidOwn=Math.round(bidAmt/2);
+  else if(val==='待定')scenarios[i].bidOwn=0;
+  scenarios[i].bidLabel=val;
+  renderScenarios();
+};
+
+function calcSim(){
+  var v=getSimVals();
+  document.getElementById('sr-rev').textContent=fmt(v.rev);
+  document.getElementById('sr-gross').textContent=fmt(v.gross);
+  document.getElementById('sr-total').textContent=fmt(v.totalCost);
+  document.getElementById('sr-items').innerHTML=simCosts.map(function(c){return '<div class="result-row result-sub"><span class="result-key">└ '+c.label+'</span><span class="result-val">-'+fmt(parseFloat(c.amount)||0)+'</span></div>';}).join('');
+  var netEl=document.getElementById('sr-net');netEl.textContent=fmt(v.net);netEl.className='net-val '+(v.net>=0?'green':'red');
+  renderScenarios();
+  renderOverview();
+}
+renderSimList();
+
+// ===== PROJECTS =====
+var projects=[{
+  id:1,name:'示例项目 A',budget:500,margin:22,revenue:480,status:'进行中',
+  note:'项目说明：此为演示数据，预算和营收均为示例，不含税务处理。',
+  deductMonthlyFee:true,deductExternalFee:false,monthlyFeeShare:20,externalFeeShare:0,
+  costs:{
+    creative:[{label:'策划成本',amount:8},{label:'平面成本',amount:12},{label:'3D成本',amount:15},{label:'创意总监',amount:6},{label:'其他创意',amount:3}],
+    externalCreative:[{label:'外部创意公司',amount:20}],
+    execution:[{label:'项目执行人力',amount:18},{label:'差旅费用',amount:5}],
+  },
+  team:[{role:'PM',name:'',days:0},{role:'策划',name:'',days:0},{role:'设计',name:'',days:0}]
+}];
+var activeProjectId=null;
+
+function calcPN(p){
+  // 毛利率已经是扣除月费和外援分摊后的真实利润率，直接用营收×毛利率计算
+  var gross=p.revenue*p.margin/100;
+  var tInt=p.costs.creative.reduce(function(s,c){return s+c.amount;},0);
+  var tExt=p.costs.externalCreative.reduce(function(s,c){return s+c.amount;},0);
+  var tExec=p.costs.execution.reduce(function(s,c){return s+c.amount;},0);
+  var net=gross-tInt-tExt-tExec;
+  // deductM/deductE now used only for display annotation, not subtraction
+  var deductM=p.deductMonthlyFee?(p.monthlyFeeShare||0):0;
+  var deductE=p.deductExternalFee?(p.externalFeeShare||0):0;
+  return{gross:gross,grossBase:gross,grossAfter:gross,tInt:tInt,tExt:tExt,tExec:tExec,deductM:deductM,deductE:deductE,totalCost:tInt+tExt+tExec,net:net,netPct:gross>0?net/gross*100:0};
+}
+
+function getInsights(p,c){
+  var ins=[];
+  var intPct=c.grossAfter>0?c.tInt/c.grossAfter*100:0;
+  var extPct=c.grossAfter>0?c.tExt/c.grossAfter*100:0;
+  var execPct=c.grossAfter>0?c.tExec/c.grossAfter*100:0;
+  var budgetPct=p.budget>0?p.revenue/p.budget*100:0;
+  if(c.net<0)ins.push({d:'red',t:'项目亏损 '+fmt(Math.abs(c.net))+'。扣除分摊后毛利不足以覆盖项目成本，需复盘报价策略或压缩执行成本。'});
+  else if(c.netPct<10)ins.push({d:'amber',t:'净利率仅 '+fmtPct(c.netPct)+'，低于建议水位（≥15%）。优先检查执行人力或外部创意是否可压缩。'});
+  if(intPct>30)ins.push({d:'amber',t:'内部创意成本占扣后毛利 '+fmtPct(intPct)+'，偏高。评估策划/平面/3D分工是否有复用或精简空间。'});
+  if(extPct>20)ins.push({d:'red',t:'外部创意成本占比 '+fmtPct(extPct)+'，建议评估是否可纳入月费制中台覆盖，避免单项目外部成本失控。'});
+  if(execPct>25)ins.push({d:'amber',t:'执行人力成本偏高（'+fmtPct(execPct)+'）。检查人员配置和差旅是否可精简。'});
+  if(p.budget>0&&budgetPct<85)ins.push({d:'amber',t:'实际营收仅达预算 '+fmtPct(budgetPct)+'。确认是否有尾款未收或项目范围缩水。预算与营收的差距本身不含税，若需含税计算可单独添加税务成本项。'});
+  if(p.budget>0&&budgetPct>=100)ins.push({d:'green',t:'营收超出预算 '+fmtPct(budgetPct-100)+'，超额完成，可作为定价参考标准。'});
+  if(c.deductM>0)ins.push({d:'blue',t:'已从毛利中扣除月费分摊 '+fmt(c.deductM)+'，净利计算已体现真实创意中台成本。'});
+  if(c.net>0&&c.netPct>=15)ins.push({d:'green',t:'净利率 '+fmtPct(c.netPct)+'，项目健康盈利，成本结构可作为同类项目参考标准。'});
+  if(ins.length===0)ins.push({d:'green',t:'暂无明显异常，各项指标在合理区间内。'});
+  return ins;
+}
+
+function statusColor(s){return{进行中:'blue',已完成:'green',搁置:'amber',亏损:'red'}[s]||'gray';}
+
+function renderProjectList(){
+  var list=document.getElementById('project-list');list.innerHTML='';
+  projects.forEach(function(p,idx){
+    var c=calcPN(p);
+    var item=document.createElement('div');item.className='project-item'+(p.id===activeProjectId?' active':'');
+    var up=idx>0?'<button class="move-btn" onclick="event.stopPropagation();moveProject('+idx+',-1)">▲</button>':'<span style="width:17px;display:inline-block;"></span>';
+    var dn=idx<projects.length-1?'<button class="move-btn" onclick="event.stopPropagation();moveProject('+idx+',1)">▼</button>':'<span style="width:17px;display:inline-block;"></span>';
+    item.innerHTML='<div style="display:flex;flex-direction:column;gap:2px;">'+up+dn+'</div>'+
+      '<div class="project-dot"></div>'+
+      '<div class="project-name-wrap"><div class="project-name">'+esc(p.name)+' <span class="badge badge-'+statusColor(p.status||'进行中')+'" style="font-size:9px;">'+(p.status||'进行中')+'</span></div>'+
+      '<div class="project-sub">预算 '+fmt(p.budget)+' · 营收 '+fmt(p.revenue)+'</div></div>'+
+      '<div class="project-profit" style="color:'+(c.net>=0?'var(--green)':'var(--red)')+'">'+fmt(c.net)+'</div>'+
+      '<button class="del-project-btn" onclick="event.stopPropagation();delProject('+p.id+')">删除</button>';
+    item.onclick=function(){selectProject(p.id);};
+    list.appendChild(item);
+  });
+}
+
+function moveProject(idx,dir){var n=idx+dir;if(n<0||n>=projects.length)return;var t=projects[idx];projects[idx]=projects[n];projects[n]=t;renderProjectList();}
+function selectProject(id){activeProjectId=id;renderProjectList();renderProjectDetail(id);}
+
+function addProject(){
+  var newId=Date.now();
+  projects.push({id:newId,name:'新项目',budget:0,margin:20,revenue:0,status:'进行中',note:'',
+    deductMonthlyFee:false,deductExternalFee:false,monthlyFeeShare:0,externalFeeShare:0,
+    costs:{creative:[{label:'策划成本',amount:0},{label:'平面成本',amount:0},{label:'3D成本',amount:0},{label:'创意总监',amount:0},{label:'其他创意',amount:0}],externalCreative:[{label:'外部创意成本',amount:0}],execution:[{label:'执行人力成本',amount:0}]},
+    team:[{role:'PM',name:'',days:0}]
+  });
+  selectProject(newId);
+}
+
+function delProject(id){
+  projects=projects.filter(function(p){return p.id!==id;});
+  if(activeProjectId===id){activeProjectId=null;document.getElementById('project-detail-wrap').innerHTML='<div style="color:var(--text3);font-size:13px;padding-top:48px;text-align:center;">← 选择左侧项目</div>';}
+  renderProjectList();
+}
+
+function renderProjectDetail(id){
+  var p=projects.find(function(x){return x.id===id;});if(!p)return;
+  var wrap=document.getElementById('project-detail-wrap');wrap.innerHTML='';
+  var tabBar=document.createElement('div');tabBar.className='sub-tabs';
+  tabBar.innerHTML='<div class="sub-tab active" id="ptab-cost-'+id+'" onclick="switchPTab(\''+id+'\',\'cost\')">成本分摊</div><div class="sub-tab" id="ptab-team-'+id+'" onclick="switchPTab(\''+id+'\',\'team\')">人力规划</div>';
+  wrap.appendChild(tabBar);
+  var costPage=document.createElement('div');costPage.id='ptab-page-cost-'+id;costPage.className='sub-page active';
+  var teamPage=document.createElement('div');teamPage.id='ptab-page-team-'+id;teamPage.className='sub-page';
+
+  // COST TAB
+  var hdr=document.createElement('div');hdr.className='project-header';
+  hdr.innerHTML='<input type="text" value="'+esc(p.name)+'" placeholder="项目名称" oninput="updatePF('+id+',\'name\',this.value)">'+
+    '<select class="status-select" onchange="updatePF('+id+',\'status\',this.value)">'+
+    ['进行中','已完成','搁置','亏损'].map(function(s){return '<option value="'+s+'"'+(p.status===s?' selected':'')+'>'+s+'</option>';}).join('')+'</select>';
+  costPage.appendChild(hdr);
+
+  var topG=document.createElement('div');topG.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;';
+  topG.innerHTML=
+    '<div class="top-box"><div class="top-box-label">总预算（万元）<span style="color:var(--text3);font-size:9px;margin-left:4px;">含税前合同金额</span></div><input type="number" value="'+p.budget+'" step="10" oninput="updatePF('+id+',\'budget\',parseFloat(this.value)||0)"></div>'+
+    '<div class="top-box"><div class="top-box-label">实际营收（万元）<span style="color:var(--text3);font-size:9px;margin-left:4px;">实收或预计</span></div><input type="number" value="'+p.revenue+'" step="10" oninput="updatePF('+id+',\'revenue\',parseFloat(this.value)||0);refreshPR('+id+')"></div>'+
+    '<div class="top-box"><div class="top-box-label">毛利率（%）</div><input type="number" value="'+p.margin+'" step="0.5" oninput="updatePF('+id+',\'margin\',parseFloat(this.value)||0);refreshPR('+id+')"></div>';
+  costPage.appendChild(topG);
+
+  var ckBox=document.createElement('div');ckBox.style.marginBottom='12px';
+  ckBox.innerHTML='<div style="font-size:10px;color:var(--text3);margin-bottom:6px;letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);">说明标注（勾选表示该成本已含在毛利率中，仅用于备注，不再重复扣减）</div>'+
+    '<div class="check-row"><input type="checkbox" id="ckm-'+id+'" '+(p.deductMonthlyFee?'checked':'')+' onchange="updatePF('+id+',\'deductMonthlyFee\',this.checked);refreshPR('+id+')"><label for="ckm-'+id+'">月费制创意分摊已含在毛利率中</label><input class="num-input" style="width:60px;" type="number" value="'+p.monthlyFeeShare+'" step="1" oninput="updatePF('+id+',\'monthlyFeeShare\',parseFloat(this.value)||0);refreshPR('+id+')"><span class="cost-unit">万/参考</span></div>'+
+    '<div class="check-row"><input type="checkbox" id="cke-'+id+'" '+(p.deductExternalFee?'checked':'')+' onchange="updatePF('+id+',\'deductExternalFee\',this.checked);refreshPR('+id+')"><label for="cke-'+id+'">外援费用分摊已含在毛利率中</label><input class="num-input" style="width:60px;" type="number" value="'+p.externalFeeShare+'" step="1" oninput="updatePF('+id+',\'externalFeeShare\',parseFloat(this.value)||0);refreshPR('+id+')"><span class="cost-unit">万/参考</span></div>';
+  costPage.appendChild(ckBox);
+
+  function makeSection(title,arrKey){
+    var arr=p.costs[arrKey];var div=document.createElement('div');div.className='cost-category';
+    div.innerHTML='<div class="cost-category-title">'+title+'</div>';var rDiv=document.createElement('div');
+    function renderRows(){rDiv.innerHTML='';arr.forEach(function(item,i){var row=document.createElement('div');row.className='cost-row';
+      row.innerHTML='<div class="cost-name"><input type="text" value="'+esc(item.label)+'" placeholder="名称" oninput="updatePC('+id+',\''+arrKey+'\','+i+',\'label\',this.value)"></div>'+
+        '<div style="display:flex;align-items:center;gap:4px;"><input class="num-input" type="number" value="'+item.amount+'" step="0.1" oninput="updatePC('+id+',\''+arrKey+'\','+i+',\'amount\',parseFloat(this.value)||0)"><span class="cost-unit">万</span></div>'+
+        '<button class="del-btn" onclick="delPC('+id+',\''+arrKey+'\','+i+')">×</button>';
+      rDiv.appendChild(row);});}
+    renderRows();div.appendChild(rDiv);
+    var ab=document.createElement('button');ab.className='add-btn';ab.textContent='+ 添加';
+    ab.onclick=function(){arr.push({label:'新项目',amount:0});renderRows();refreshPR(id);};div.appendChild(ab);return div;
+  }
+  var panel=document.createElement('div');panel.className='panel';panel.style.padding='13px 16px';
+  panel.appendChild(makeSection('内部创意成本（策划·平面·3D·总监·其他）','creative'));
+  panel.appendChild(makeSection('外部创意成本','externalCreative'));
+  panel.appendChild(makeSection('执行人力成本','execution'));
+  costPage.appendChild(panel);
+  var rd=document.createElement('div');rd.id='project-result-'+id;costPage.appendChild(rd);
+
+  // TEAM TAB
+  var th=document.createElement('div');th.style.cssText='font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);margin-bottom:10px;margin-top:4px;';
+  th.textContent='人力配置 · 角色名称可编辑，填写参与人和预计投入天数';teamPage.appendChild(th);
+  var tPanel=document.createElement('div');tPanel.className='panel';tPanel.style.padding='13px 16px';
+  var thead=document.createElement('div');thead.style.cssText='display:grid;grid-template-columns:90px 1fr 70px 22px;gap:8px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);margin-bottom:4px;';
+  thead.innerHTML='<div style="font-size:10px;color:var(--text3);">角色</div><div style="font-size:10px;color:var(--text3);">姓名</div><div style="font-size:10px;color:var(--text3);text-align:right;">投入天数</div><div></div>';
+  tPanel.appendChild(thead);
+  var tRows=document.createElement('div');tRows.id='team-rows-'+id;
+  function renderTeam(){tRows.innerHTML='';p.team.forEach(function(m,i){
+    var row=document.createElement('div');row.style.cssText='display:grid;grid-template-columns:90px 1fr 70px 22px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML='<input class="team-role-input" type="text" value="'+esc(m.role)+'" placeholder="角色" oninput="p.team['+i+'].role=this.value">'+
+      '<input class="team-name-input" type="text" value="'+esc(m.name)+'" placeholder="姓名或花名" oninput="p.team['+i+'].name=this.value">'+
+      '<input class="team-time-input" type="number" value="'+m.days+'" placeholder="0" step="1" oninput="p.team['+i+'].days=parseFloat(this.value)||0;refreshTeamSummary('+id+')">'+
+      '<button class="del-btn" onclick="p.team.splice('+i+',1);renderTeam();refreshTeamSummary('+id+')">×</button>';
+    tRows.appendChild(row);});}
+  renderTeam();tPanel.appendChild(tRows);
+  var addTBtn=document.createElement('button');addTBtn.className='add-btn';addTBtn.textContent='+ 添加成员';
+  addTBtn.onclick=function(){p.team.push({role:'支持者',name:'',days:0});renderTeam();refreshTeamSummary(id);};
+  tPanel.appendChild(addTBtn);teamPage.appendChild(tPanel);
+  var ts=document.createElement('div');ts.id='team-summary-'+id;teamPage.appendChild(ts);
+
+  wrap.appendChild(costPage);wrap.appendChild(teamPage);
+  refreshPR(id);refreshTeamSummary(id);
+}
+
+window.switchPTab=function(id,tab){
+  ['cost','team'].forEach(function(t){
+    var pg=document.getElementById('ptab-page-'+t+'-'+id);var tb=document.getElementById('ptab-'+t+'-'+id);
+    if(pg)pg.classList.toggle('active',t===tab);if(tb)tb.classList.toggle('active',t===tab);
+  });
+};
+
+function refreshTeamSummary(id){
+  var p=projects.find(function(x){return x.id===id;});var el=document.getElementById('team-summary-'+id);if(!p||!el)return;
+  var totalDays=p.team.reduce(function(s,m){return s+(m.days||0);},0);
+  var filled=p.team.filter(function(m){return m.name&&m.name.trim();}).length;
+  el.innerHTML='<div class="result-block" style="margin-top:12px;">'+
+    '<div class="result-row"><span class="result-key">配置人数</span><span class="result-val">'+p.team.length+' 人</span></div>'+
+    '<div class="result-row"><span class="result-key">已分配成员</span><span class="result-val">'+filled+' / '+p.team.length+'</span></div>'+
+    '<div class="result-row"><span class="result-key">合计投入天数</span><span class="result-val">'+totalDays+' 天</span></div>'+
+    p.team.filter(function(m){return m.name;}).map(function(m){return '<div class="result-row result-sub"><span class="result-key">└ '+esc(m.role)+'</span><span class="result-val">'+esc(m.name)+(m.days?' · '+m.days+'天':'')+'</span></div>';}).join('')+
+    '</div>';
+}
+
+function updatePF(id,field,val){var p=projects.find(function(x){return x.id===id;});if(p){p[field]=val;renderProjectList();}}
+function updatePC(id,arrKey,idx,field,val){var p=projects.find(function(x){return x.id===id;});if(p&&p.costs[arrKey]&&p.costs[arrKey][idx]){p.costs[arrKey][idx][field]=val;refreshPR(id);renderProjectList();}}
+function delPC(id,arrKey,idx){var p=projects.find(function(x){return x.id===id;});if(p&&p.costs[arrKey]){p.costs[arrKey].splice(idx,1);renderProjectDetail(id);}}
+
+function refreshPR(id){
+  var p=projects.find(function(x){return x.id===id;});if(!p)return;
+  var el=document.getElementById('project-result-'+id);if(!el)return;
+  var c=calcPN(p);var ins=getInsights(p,c);
+  el.innerHTML='<div class="result-block" style="margin-top:12px;">'+
+    '<div class="result-row"><span class="result-key">毛利额（营收×'+fmtPct(p.margin)+'，已含月费/外援扣除）</span><span class="result-val">'+fmt(c.gross)+'</span></div>'+
+    (c.deductM>0?'<div class="result-row result-sub"><span class="result-key">└ 月费已含扣 '+fmt(c.deductM)+'（已反映在毛利率中）</span><span class="result-val" style="color:var(--text3);">—</span></div>':'')+
+    (c.deductE>0?'<div class="result-row result-sub"><span class="result-key">└ 外援已含扣 '+fmt(c.deductE)+'（已反映在毛利率中）</span><span class="result-val" style="color:var(--text3);">—</span></div>':'')+
+    '<div class="result-row"><span class="result-key">内部创意成本合计</span><span class="result-val">-'+fmt(c.tInt)+'</span></div>'+
+    p.costs.creative.map(function(x){return '<div class="result-row result-sub"><span class="result-key">└ '+esc(x.label)+'</span><span class="result-val">-'+fmt(x.amount)+'</span></div>';}).join('')+
+    '<div class="result-row"><span class="result-key">外部创意成本合计</span><span class="result-val">-'+fmt(c.tExt)+'</span></div>'+
+    p.costs.externalCreative.map(function(x){return '<div class="result-row result-sub"><span class="result-key">└ '+esc(x.label)+'</span><span class="result-val">-'+fmt(x.amount)+'</span></div>';}).join('')+
+    '<div class="result-row"><span class="result-key">执行人力成本合计</span><span class="result-val">-'+fmt(c.tExec)+'</span></div>'+
+    p.costs.execution.map(function(x){return '<div class="result-row result-sub"><span class="result-key">└ '+esc(x.label)+'</span><span class="result-val">-'+fmt(x.amount)+'</span></div>';}).join('')+
+    '<div class="net-row"><span class="net-label">项目净利润</span><span class="net-val '+(c.net>=0?'green':'red')+'">'+fmt(c.net)+' <span style="font-size:13px;">('+fmtPct(c.netPct)+')</span></span></div>'+
+    '</div>'+
+    '<div class="ai-box"><div class="ai-box-title">∙ 成本分析 · 需关注的地方</div>'+
+    ins.map(function(i){return '<div class="ai-insight"><div class="ai-dot '+i.d+'"></div><div>'+i.t+'</div></div>';}).join('')+'</div>';
+  renderProjectList();
+}
+renderProjectList();
+
+// ===== CASH =====
+var cashData={
+  supplier:[{label:'供应商 A',amount:30,due:'2026-04-10'},{label:'供应商 B',amount:15,due:'2026-04-15'}],
+  urgent:[{label:'紧急印刷费',amount:5,due:'2026-04-05'}],
+  freelance:[{label:'自由设计师 A',amount:8,due:'2026-04-20'},{label:'自由撰稿人',amount:3,due:'2026-04-25'}],
+};
+var monthlyData=[
+  {year:2025,month:9,income:380,expense:310},
+  {year:2025,month:10,income:420,expense:330},
+  {year:2025,month:11,income:450,expense:350},
+  {year:2025,month:12,income:510,expense:380},
+  {year:2026,month:1,income:390,expense:340},
+  {year:2026,month:2,income:430,expense:360},
+];
+
+function cashAddRow(type){var m={supplier:'供应商',urgent:'紧急事项',freelance:'Free人员'};cashData[type].push({label:m[type],amount:0,due:''});renderCash();}
+
+function renderCashSection(type,containerId,tagCls,tagLabel){
+  var container=document.getElementById(containerId);container.innerHTML='';
+  cashData[type].forEach(function(item,i){
+    var row=document.createElement('div');row.className='cash-row';
+    row.innerHTML='<span class="cash-tag '+tagCls+'">'+tagLabel+'</span>'+
+      '<input class="cash-label-input" type="text" value="'+esc(item.label)+'" placeholder="名称" oninput="cashData[\''+type+'\']['+i+'].label=this.value">'+
+      '<input class="cash-date-input" type="date" value="'+esc(item.due||'')+'" oninput="cashData[\''+type+'\']['+i+'].due=this.value" title="到期日">'+
+      '<input class="cash-amt-input" type="number" value="'+item.amount+'" step="1" oninput="cashData[\''+type+'\']['+i+'].amount=parseFloat(this.value)||0;calcCash()">'+
+      '<span class="cost-unit">万</span>'+
+      '<button class="del-btn" onclick="cashData[\''+type+'\'].splice('+i+',1);renderCash()">×</button>';
+    container.appendChild(row);
+  });
+}
+
+function renderCash(){
+  renderCashSection('supplier','cash-supplier-list','tag-supplier','供应商');
+  renderCashSection('urgent','cash-urgent-list','tag-urgent','紧急');
+  renderCashSection('freelance','cash-free-list','tag-free','Free');
+  calcCash();
+}
+
+function calcCash(){
+  var total=parseFloat(document.getElementById('cash-total').value)||0;
+  var sSum=cashData.supplier.reduce(function(s,c){return s+c.amount;},0);
+  var uSum=cashData.urgent.reduce(function(s,c){return s+c.amount;},0);
+  var fSum=cashData.freelance.reduce(function(s,c){return s+c.amount;},0);
+  var committed=sSum+uSum+fSum;var free=total-committed;var freePct=total>0?free/total*100:0;
+  document.getElementById('cash-committed').textContent=fmt(committed);
+  document.getElementById('cash-committed-pct').textContent='占比 '+(total>0?fmtPct(committed/total*100):'—');
+  var fv=document.getElementById('cash-free-val');fv.textContent=fmt(free);fv.className='cash-pool-val '+(free>total*0.3?'green':free>0?'amber':'red');
+  var bar=document.getElementById('cash-free-bar');bar.style.width=Math.max(0,Math.min(freePct,100))+'%';bar.className='prog-bar '+(free>total*0.3?'green':free>0?'amber':'red');
+  document.getElementById('cash-breakdown').innerHTML=[
+    {label:'供应商付款',amount:sSum,cls:'amber'},{label:'紧急付款',amount:uSum,cls:'red'},{label:'Free人员',amount:fSum,cls:'blue'},{label:'可用余额',amount:Math.max(free,0),cls:'green'},
+  ].map(function(item){var pct=total>0?item.amount/total*100:0;return '<div style="margin-bottom:9px;"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;"><span style="color:var(--text2);">'+item.label+'</span><span style="font-family:var(--mono);color:var(--text);">'+fmt(item.amount)+'</span></div><div class="prog-wrap"><div class="prog-bar '+item.cls+'" style="width:'+Math.min(pct,100)+'%"></div></div><div style="font-size:10px;color:var(--text3);margin-top:2px;">'+fmtPct(pct)+'</div></div>';}).join('');
+
+  var totalIncome=monthlyData.reduce(function(s,m){return s+m.income;},0);
+  var totalExpense=monthlyData.reduce(function(s,m){return s+m.expense;},0);
+  var monthNet=totalIncome-totalExpense;
+  var netEl=document.getElementById('cash-month-net');netEl.textContent=fmt(monthNet);netEl.className='metric-value '+(monthNet>=0?'green':'red');
+  document.getElementById('cash-month-sub').textContent='累计 '+monthlyData.length+' 个月';
+}
+
+// MONTHLY
+function addMonth(){
+  var last=monthlyData.length>0?monthlyData[monthlyData.length-1]:{year:new Date().getFullYear(),month:new Date().getMonth()+1};
+  var y=last.year,m=last.month+1;if(m>12){m=1;y++;}
+  monthlyData.push({year:y,month:m,income:0,expense:0});
+  renderMonthly();
+}
+
+function renderMonthly(){
+  var list=document.getElementById('monthly-list');list.innerHTML='';
+  var totalIncome=0,totalExpense=0;
+  monthlyData.forEach(function(row,i){
+    totalIncome+=row.income;totalExpense+=row.expense;
+  });
+  var monthNames=['','1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  monthlyData.forEach(function(row,i){
+    var net=row.income-row.expense;
+    var weightPct=totalIncome>0?row.income/totalIncome*100:0;
+    var el=document.createElement('div');el.className='month-row';
+    // Year and month selectors
+    var monthOpts=monthNames.slice(1).map(function(mn,mi){var mv=mi+1;return '<option value="'+mv+'"'+(row.month===mv?' selected':'')+'>'+mn+'</option>';}).join('');
+    el.innerHTML=
+      '<div class="month-selector">'+
+        '<input class="month-year-input" type="number" value="'+row.year+'" min="2020" max="2035" oninput="monthlyData['+i+'].year=parseInt(this.value)||2026;renderMonthly();calcCash()">'+
+        '<select class="month-month-select" onchange="monthlyData['+i+'].month=parseInt(this.value);renderMonthly();calcCash()">'+monthOpts+'</select>'+
+      '</div>'+
+      '<input class="month-num-input income" type="number" value="'+row.income+'" step="1" oninput="monthlyData['+i+'].income=parseFloat(this.value)||0;renderMonthly();calcCash()">'+
+      '<input class="month-num-input expense" type="number" value="'+row.expense+'" step="1" oninput="monthlyData['+i+'].expense=parseFloat(this.value)||0;renderMonthly();calcCash()">'+
+      '<div style="font-family:var(--mono);font-size:12px;color:'+(net>=0?'var(--green)':'var(--red)')+';">'+fmt(net)+'</div>'+
+      '<div style="font-family:var(--mono);font-size:11px;color:var(--text3);">'+fmtPct(weightPct)+'</div>'+
+      '<button class="del-btn" onclick="monthlyData.splice('+i+',1);renderMonthly();calcCash()">×</button>';
+    list.appendChild(el);
+  });
+
+  var totalNet=totalIncome-totalExpense;
+  var avgNet=monthlyData.length>0?totalNet/monthlyData.length:0;
+  var maxIncome=monthlyData.reduce(function(mx,m){return Math.max(mx,m.income);},0);
+  var maxMonth=monthlyData.find(function(m){return m.income===maxIncome;});
+  var profitMonths=monthlyData.filter(function(m){return m.income>m.expense;}).length;
+  var minExpense=monthlyData.reduce(function(mn,m){return Math.min(mn,m.expense);},Infinity);
+  document.getElementById('monthly-summary').innerHTML='<div class="result-block">'+
+    '<div class="result-row"><span class="result-key">合计收入</span><span class="result-val" style="color:var(--green);">'+fmt(totalIncome)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">合计支出</span><span class="result-val" style="color:var(--red);">'+fmt(totalExpense)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">合计净额</span><span class="result-val" style="color:'+(totalNet>=0?'var(--green)':'var(--red)')+';">'+fmt(totalNet)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">月均净额</span><span class="result-val">'+fmt(avgNet)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">盈余月份</span><span class="result-val">'+profitMonths+' / '+monthlyData.length+' 月</span></div>'+
+    (maxMonth?'<div class="result-row"><span class="result-key">收入最高月</span><span class="result-val">'+maxMonth.year+'/'+maxMonth.month+'月 · '+fmt(maxIncome)+'</span></div>':'')+
+    '</div>';
+
+  var trendLines=[];
+  if(monthlyData.length>=2){
+    var n=monthlyData.length;var recentHalf=monthlyData.slice(Math.floor(n/2));var earlyHalf=monthlyData.slice(0,Math.floor(n/2));
+    var recentAvg=recentHalf.reduce(function(s,m){return s+m.income-m.expense;},0)/(recentHalf.length||1);
+    var earlyAvg=earlyHalf.reduce(function(s,m){return s+m.income-m.expense;},0)/(earlyHalf.length||1);
+    if(recentAvg>earlyAvg)trendLines.push({d:'green',t:'近期净额均值（'+fmt(recentAvg)+'）高于前期（'+fmt(earlyAvg)+'），整体呈正向趋势。'});
+    else trendLines.push({d:'amber',t:'近期净额均值（'+fmt(recentAvg)+'）低于前期（'+fmt(earlyAvg)+'），需关注收入趋势是否持续走弱。'});
+  }
+  if(totalIncome>0){var er=totalExpense/totalIncome*100;trendLines.push({d:er<80?'green':'amber',t:'整体支出占收入比 '+fmtPct(er)+'，'+(er<80?'支出控制良好。':'支出偏高，建议审查固定成本结构。')});}
+  if(profitMonths<monthlyData.length)trendLines.push({d:'red',t:'存在 '+(monthlyData.length-profitMonths)+' 个亏损月，建议核查当月大额支出原因。'});
+  document.getElementById('monthly-trend').innerHTML=trendLines.map(function(t){return '<div style="display:flex;gap:8px;margin-bottom:8px;"><div style="width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px;background:var(--'+t.d+');"></div><div>'+t.t+'</div></div>';}).join('')||'<div style="color:var(--text3);">暂无数据</div>';
+}
+
+renderCash();
+renderMonthly();
+
+// ===== CREATIVE FEE PLANNER =====
+var cfRoles=[
+  {label:'创意总监',monthly:5,count:1},
+  {label:'策划',monthly:3,count:2},
+  {label:'2D 平面设计',monthly:3,count:2},
+  {label:'3D 设计师',monthly:3,count:1},
+  {label:'视频剪辑',monthly:2,count:1},
+];
+
+function cfGetAnnual(){
+  var override=parseFloat(document.getElementById('cf-annual-override').value);
+  if(!isNaN(override)&&override>0)return override;
+  var monthTotal=cfRoles.reduce(function(s,r){return s+r.monthly*r.count;},0);
+  return Math.round(monthTotal*12*10)/10;
+}
+
+function cfAddRole(){cfRoles.push({label:'新角色',monthly:0,count:1});renderCreativeFee();}
+
+function renderCreativeFee(){
+  var list=document.getElementById('cf-role-list');list.innerHTML='';
+  var cap=parseFloat(document.getElementById('cf-monthly-cap').value)||0;
+  cfRoles.forEach(function(r,i){
+    var row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:1fr 80px 80px 26px;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);';
+    row.innerHTML='<input style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:13px;font-family:var(--sans);outline:none;width:100%;" type="text" value="'+esc(r.label)+'" placeholder="角色名称" oninput="cfRoles['+i+'].label=this.value;calcCreativeFee()">'+
+      '<input class="num-input" type="number" value="'+r.monthly+'" step="0.5" oninput="cfRoles['+i+'].monthly=parseFloat(this.value)||0;calcCreativeFee()">'+
+      '<input class="num-input" type="number" value="'+r.count+'" step="1" min="0" oninput="cfRoles['+i+'].count=parseInt(this.value)||0;calcCreativeFee()">'+
+      '<button class="del-btn" onclick="cfRoles.splice('+i+',1);renderCreativeFee()">×</button>';
+    list.appendChild(row);
+  });
+  calcCreativeFee();
+}
+
+function calcCreativeFee(){
+  var cap=parseFloat(document.getElementById('cf-monthly-cap').value)||0;
+  var monthTotal=cfRoles.reduce(function(s,r){return s+(r.monthly||0)*(r.count||0);},0);
+  var annualAuto=Math.round(monthTotal*12*10)/10;
+  var annual=cfGetAnnual();
+  var utilPct=cap>0?monthTotal/cap*100:0;
+  var surplus=cap-monthTotal;
+
+  // Sync to simCosts monthly item
+  var mItem=simCosts.find(function(c){return c.isMonthly;});
+  if(mItem){mItem.amount=annual;renderSimList();}
+
+  document.getElementById('cf-summary').innerHTML='<div class="result-block">'+
+    '<div class="result-row"><span class="result-key">月度预算上限</span><span class="result-val">'+fmt(cap)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">月度已配置</span><span class="result-val" style="color:'+(monthTotal>cap?'var(--red)':'var(--text)')+';">'+fmt(monthTotal)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">月度余额</span><span class="result-val" style="color:'+(surplus>=0?'var(--green)':'var(--red)')+';">'+fmt(surplus)+'</span></div>'+
+    '<div class="prog-wrap" style="height:5px;margin:4px 0 8px;"><div class="prog-bar '+(utilPct>100?'red':utilPct>85?'amber':'green')+'" style="width:'+Math.min(utilPct,100)+'%;"></div></div>'+
+    '<div class="result-row"><span class="result-key">利用率</span><span class="result-val">'+fmtPct(utilPct)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">年度自动合计（×12）</span><span class="result-val">'+fmt(annualAuto)+'</span></div>'+
+    '<div class="result-row"><span class="result-key">年度生效费用</span><span class="result-val" style="color:var(--accent);">'+fmt(annual)+'</span></div>'+
+    '<div class="result-row result-sub"><span class="result-key">└ 已同步至成本模拟器</span><span class="result-val" style="color:var(--green);">✓</span></div>'+
+    cfRoles.map(function(r){return '<div class="result-row result-sub"><span class="result-key">└ '+esc(r.label)+' ×'+r.count+'</span><span class="result-val">'+fmt(r.monthly*r.count)+'/月</span></div>';}).join('')+
+    '</div>';
+
+  var tips=[];
+  if(utilPct>100)tips.push({d:'red',t:'月度配置超出预算 '+fmt(monthTotal-cap)+'，需减少人力配置或提高月费上限。'});
+  else if(utilPct>90)tips.push({d:'amber',t:'月费利用率 '+fmtPct(utilPct)+'，接近上限，弹性空间有限。遇到临时需求可能需要突破预算。'});
+  else if(utilPct>60)tips.push({d:'green',t:'月费利用率 '+fmtPct(utilPct)+'，配置合理，有 '+fmt(surplus)+' 的弹性空间用于临时外援或项目峰值。'});
+  else tips.push({d:'blue',t:'月费利用率仅 '+fmtPct(utilPct)+'，配置偏保守。可考虑增加人力角色或降低月费上限设置以更准确反映实际成本。'});
+  if(cfRoles.length>0){
+    var maxRole=cfRoles.reduce(function(mx,r){return r.monthly*r.count>mx.monthly*mx.count?r:mx;},cfRoles[0]);
+    tips.push({d:'amber',t:'最高单项成本：'+esc(maxRole.label)+' ×'+maxRole.count+' = '+fmt(maxRole.monthly*maxRole.count)+'/月，占月费总额 '+fmtPct(cap>0?maxRole.monthly*maxRole.count/cap*100:0)+'。'});
+  }
+  document.getElementById('cf-analysis').innerHTML=tips.map(function(t){return '<div style="display:flex;gap:8px;margin-bottom:8px;"><div style="width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:8px;background:var(--'+t.d+');"></div><div>'+t.t+'</div></div>';}).join('');
+  saveData();
+}
+
+renderCreativeFee();
+
+// ===== LOCAL STORAGE PERSISTENCE =====
+var SAVE_KEY='zm_dashboard_v5';
+var _saving=false;
+
+function saveData(){
+  if(_saving)return;_saving=true;
+  setTimeout(function(){
+    try{
+      var rev=document.getElementById('sim-rev')?document.getElementById('sim-rev').value:'5177';
+      var margin=document.getElementById('sim-margin')?document.getElementById('sim-margin').value:'20.86';
+      var cfCap=document.getElementById('cf-monthly-cap')?document.getElementById('cf-monthly-cap').value:'24';
+      var cfOverride=document.getElementById('cf-annual-override')?document.getElementById('cf-annual-override').value:'';
+      var cashTotal=document.getElementById('cash-total')?document.getElementById('cash-total').value:'500';
+      var data={
+        v:5,ts:Date.now(),
+        simRev:rev,simMargin:margin,
+        simCosts:simCosts,scenarios:scenarios,
+        cfRoles:cfRoles,cfCap:cfCap,cfOverride:cfOverride,
+        projects:projects,activeProjectId:activeProjectId,
+        cashData:cashData,cashTotal:cashTotal,
+        monthlyData:monthlyData,
+      };
+      localStorage.setItem(SAVE_KEY,JSON.stringify(data));
+    }catch(e){console.warn('Save failed',e);}
+    _saving=false;
+  },400);
+}
+
+function loadData(){
+  try{
+    var raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return false;
+    var data=JSON.parse(raw);
+    if(!data||data.v!==5)return false;
+    if(data.simRev)document.getElementById('sim-rev').value=data.simRev;
+    if(data.simMargin)document.getElementById('sim-margin').value=data.simMargin;
+    if(data.simCosts&&data.simCosts.length)simCosts=data.simCosts;
+    if(data.scenarios&&data.scenarios.length)scenarios=data.scenarios;
+    if(data.cfRoles&&data.cfRoles.length)cfRoles=data.cfRoles;
+    if(data.cfCap)document.getElementById('cf-monthly-cap').value=data.cfCap;
+    if(data.cfOverride)document.getElementById('cf-annual-override').value=data.cfOverride;
+    if(data.projects&&data.projects.length)projects=data.projects;
+    if(data.activeProjectId)activeProjectId=data.activeProjectId;
+    if(data.cashData)cashData=data.cashData;
+    if(data.cashTotal)document.getElementById('cash-total').value=data.cashTotal;
+    if(data.monthlyData&&data.monthlyData.length)monthlyData=data.monthlyData;
+    return true;
+  }catch(e){console.warn('Load failed',e);return false;}
+}
+
+// Intercept all state-changing functions to auto-save
+var _origCalcSim=calcSim;
+calcSim=function(){_origCalcSim();saveData();};
+var _origRenderCash=renderCash;
+renderCash=function(){_origRenderCash();saveData();};
+var _origRenderMonthly=renderMonthly;
+renderMonthly=function(){_origRenderMonthly();saveData();};
+var _origRenderProjectList=renderProjectList;
+renderProjectList=function(){_origRenderProjectList();saveData();};
+
+// Load on start
+(function(){
+  var loaded=loadData();
+  renderSimList();
+  renderCreativeFee();
+  renderProjectList();
+  renderCash();
+  renderMonthly();
+  if(loaded){
+    var ts=localStorage.getItem(SAVE_KEY);
+    if(ts){var d=JSON.parse(ts);var ago=Math.round((Date.now()-d.ts)/60000);
+      var bar=document.createElement('div');
+      bar.style.cssText='position:fixed;bottom:16px;right:16px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:8px 14px;font-size:11px;font-family:var(--mono);color:var(--green);z-index:999;';
+      bar.textContent='✓ 已恢复上次保存的数据（'+ago+'分钟前）';
+      document.body.appendChild(bar);setTimeout(function(){bar.remove();},3000);
+    }
+  }
+})();
+</script>
+</body>
+</html>
